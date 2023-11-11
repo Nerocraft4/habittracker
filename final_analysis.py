@@ -46,61 +46,61 @@ numerics = raw.select_dtypes('number')
 normzd = normalize(numerics)
 
 #pearson correlation matrix
-# corr = normzd.corr(method='pearson')
-# mask = corr.copy().applymap(significance_pearson)
-# mask2 = np.triu(np.ones_like(corr, dtype=bool))
-# mask_comb = combine_masks(mask, mask2)
-# c = sns.heatmap(corr, annot=True)
-# sns.heatmap(corr, annot=True).set_xticklabels(c.get_xticklabels(), rotation=-45)
-# plt.show()
-# sns.heatmap(corr, annot=True, mask=mask_comb).set_xticklabels(c.get_xticklabels(), rotation=-45)
-# plt.show()
+corr = normzd.corr(method='pearson')
+mask = corr.copy().applymap(significance_pearson)
+mask2 = np.triu(np.ones_like(corr, dtype=bool))
+mask_comb = combine_masks(mask, mask2)
+c = sns.heatmap(corr, annot=True)
+sns.heatmap(corr, annot=True).set_xticklabels(c.get_xticklabels(), rotation=-45)
+plt.show()
+sns.heatmap(corr, annot=True, mask=mask_comb).set_xticklabels(c.get_xticklabels(), rotation=-45)
+plt.show()
 
 # #spearman's rank correlation matrix
-# corr = normzd.corr(method='spearman')
-# mask = corr.copy().applymap(significance_spearman)
-# mask2 = np.triu(np.ones_like(corr, dtype=bool))
-# mask_comb = combine_masks(mask, mask2)
-# c = sns.heatmap(corr, annot=True)
-# sns.heatmap(corr, annot=True).set_xticklabels(c.get_xticklabels(), rotation=-45)
-# plt.show()
-# sns.heatmap(corr, annot=True, mask=mask_comb).set_xticklabels(c.get_xticklabels(), rotation=-45)
-# plt.show()
+corr = normzd.corr(method='spearman')
+mask = corr.copy().applymap(significance_spearman)
+mask2 = np.triu(np.ones_like(corr, dtype=bool))
+mask_comb = combine_masks(mask, mask2)
+c = sns.heatmap(corr, annot=True)
+sns.heatmap(corr, annot=True).set_xticklabels(c.get_xticklabels(), rotation=-45)
+plt.show()
+sns.heatmap(corr, annot=True, mask=mask_comb).set_xticklabels(c.get_xticklabels(), rotation=-45)
+plt.show()
 
 #autoarima
-# arima.auto_arima(numerics['Sleep'], trace=True)
-# arima.auto_arima(numerics['Studying'], trace=True)
-# arima.auto_arima(numerics['Socializing'], trace=True)
-# arima.auto_arima(numerics['Mood'], trace=True)
+arima.auto_arima(numerics['Sleep'], trace=True)
+arima.auto_arima(numerics['Studying'], trace=True)
+arima.auto_arima(numerics['Socializing'], trace=True)
+arima.auto_arima(numerics['Mood'], trace=True)
 
 #FFT
-# for v in ['Sleep','Studying','Socializing','Mood']:
-#     t = np.arange(0,N,1)
-#     x = numerics[v]
+for v in ['Sleep','Studying','Socializing','Mood']:
+    t = np.arange(0,N,1)
+    x = numerics[v]
 
-#     X = np.fft.fft(x)
-#     N = len(X)
-#     n = np.arange(0,N,1)
-#     T = N
-#     freq = n/T 
+    X = np.fft.fft(x)
+    N = len(X)
+    n = np.arange(0,N,1)
+    T = N
+    freq = n/T 
 
-#     plt.figure(figsize = (8, 4))
+    plt.figure(figsize = (8, 4))
 
-#     plt.subplot(121)
-#     plt.plot(t, x, 'r')
-#     plt.xlabel('Time (days)')
-#     plt.ylabel(v)
+    plt.subplot(121)
+    plt.plot(t, x, 'r')
+    plt.xlabel('Time (days)')
+    plt.ylabel(v)
 
-#     plt.subplot(122)
-#     plt.stem(n, np.abs(X), 'b', \
-#             markerfmt=" ", basefmt="-b")
-#     plt.xlabel('Freq (1/days)')
-#     plt.ylabel('FFT |X(freq)|')
-#     plt.xlim(0, 30)
-#     plt.ylim(0, 500)
+    plt.subplot(122)
+    plt.stem(n, np.abs(X), 'b', \
+            markerfmt=" ", basefmt="-b")
+    plt.xlabel('Freq (1/days)')
+    plt.ylabel('FFT |X(freq)|')
+    plt.xlim(0, 30)
+    plt.ylim(0, 500)
 
-#     plt.tight_layout()
-#     plt.show()
+    plt.tight_layout()
+    plt.show()
 
 #FFT-MA(k)
 k = 5
