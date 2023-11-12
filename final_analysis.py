@@ -1,8 +1,8 @@
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-from pmdarima import arima
+import pandas as pd               #1.4.4
+import numpy as np                #1.22.4
+import seaborn as sns             #0.12.0
+import matplotlib.pyplot as plt   #3.5.2
+from pmdarima import arima        #2.0.4
 
 N=332 #number of samples
 STEST = 2/np.sqrt(N)
@@ -10,14 +10,6 @@ TTEST = 1.96
 
 def moving_average(x, w):
     return np.convolve(x, np.ones(w), 'valid') / w
-
-def normalize(df):
-    result = df.copy()
-    for feature_name in df.columns:
-        max_value = df[feature_name].max()
-        min_value = df[feature_name].min()
-        result[feature_name] = (df[feature_name] - min_value) / (max_value - min_value)
-    return result
 
 def significance_pearson(val):
     if np.abs(val)<STEST:
@@ -32,55 +24,43 @@ def significance_spearman(val):
         return True
     return False
 
-def combine_masks(df,triangle):
-    N = df.shape[0]
-    M = df.shape[1]
-    mask_comb = np.zeros(df.shape, dtype=bool)
-    for i in range(N):
-        for j in range(M):
-            mask_comb[i][j] = df.iat[i, j] or triangle[i][j]
-    return mask_comb
-
 raw = pd.read_csv("final_stats.csv", sep=";")
 numerics = raw.select_dtypes('number')
-normzd = normalize(numerics)
 
 #pearson correlation matrix
-corr = normzd.corr(method='pearson')
+corr = numerics.corr(method='pearson')
 mask = corr.copy().applymap(significance_pearson)
 mask2 = np.triu(np.ones_like(corr, dtype=bool))
-mask_comb = combine_masks(mask, mask2)
+mask_comb = np.logical_or(mask, mask2)
 c = sns.heatmap(corr, annot=True)
-sns.heatmap(corr, annot=True).set_xticklabels(c.get_xticklabels(), rotation=-45)
+c.set_xticklabels(c.get_xticklabels(), rotation=-45)
 plt.show()
-sns.heatmap(corr, annot=True, mask=mask_comb).set_xticklabels(c.get_xticklabels(), rotation=-45)
+c = sns.heatmap(corr, annot=True, mask=mask_comb)
+c.set_xticklabels(c.get_xticklabels(), rotation=-45)
 plt.show()
 
-# #spearman's rank correlation matrix
-corr = normzd.corr(method='spearman')
+#spearman's rank correlation matrix
+corr = numerics.corr(method='spearman')
 mask = corr.copy().applymap(significance_spearman)
 mask2 = np.triu(np.ones_like(corr, dtype=bool))
-mask_comb = combine_masks(mask, mask2)
+mask_comb = np.logical_or(mask, mask2)
 c = sns.heatmap(corr, annot=True)
-sns.heatmap(corr, annot=True).set_xticklabels(c.get_xticklabels(), rotation=-45)
+c.set_xticklabels(c.get_xticklabels(), rotation=-45)
 plt.show()
-sns.heatmap(corr, annot=True, mask=mask_comb).set_xticklabels(c.get_xticklabels(), rotation=-45)
+c = sns.heatmap(corr, annot=True, mask=mask_comb)
+c.set_xticklabels(c.get_xticklabels(), rotation=-45)
 plt.show()
 
 #autoarima
-arima.auto_arima(numerics['Sleep'], trace=True)
-arima.auto_arima(numerics['Studying'], trace=True)
-arima.auto_arima(numerics['Socializing'], trace=True)
-arima.auto_arima(numerics['Mood'], trace=True)
+for v in ['Sleep','Studying','Socializing','Mood']:
+    arima.auto_arima(numerics[v], trace=True)
 
-#FFT
+# FFT
 for v in ['Sleep','Studying','Socializing','Mood']:
     t = np.arange(0,N,1)
     x = numerics[v]
-
     X = np.fft.fft(x)
-    N = len(X)
-    n = np.arange(0,N,1)
+    n = np.arange(0,len(X),1)
     T = N
     freq = n/T 
 
@@ -92,8 +72,7 @@ for v in ['Sleep','Studying','Socializing','Mood']:
     plt.ylabel(v)
 
     plt.subplot(122)
-    plt.stem(n, np.abs(X), 'b', \
-            markerfmt=" ", basefmt="-b")
+    plt.stem(n, np.abs(X), 'b', markerfmt=" ", basefmt="-b")
     plt.xlabel('Freq (1/days)')
     plt.ylabel('FFT |X(freq)|')
     plt.xlim(0, 30)
@@ -107,7 +86,6 @@ k = 5
 for v in ['Sleep','Studying','Socializing','Mood']:
     t = np.arange(0,N-k+1,1)
     x = moving_average(numerics[v], k)
-
     X = np.fft.fft(x)
     n = np.arange(0,len(X),1)
     T = N-k+1
@@ -121,10 +99,7 @@ for v in ['Sleep','Studying','Socializing','Mood']:
     plt.ylabel(v)
 
     plt.subplot(122)
-    print(n)
-    print(x)
-    plt.stem(n, np.abs(X), 'b', \
-            markerfmt=" ", basefmt="-b")
+    plt.stem(n, np.abs(X), 'b', markerfmt=" ", basefmt="-b")
     plt.xlabel('Freq (1/days)')
     plt.ylabel('FFT |X(freq)|')
     plt.xlim(0, 30)
